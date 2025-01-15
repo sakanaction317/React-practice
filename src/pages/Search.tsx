@@ -1,20 +1,33 @@
 // src/pages/Search.tsx
 
-import React, {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 import SearchBar from "../components/SearchBar";
-import { Container, Grid2, Card, CardContent, Typography, Button, IconButton } from "@mui/material";
-import { collection, doc, getDocs, query, where, updateDoc, arrayUnion } from "firebase/firestore";
+import { Container, Grid, Card, CardContent, Typography, Button } from "@mui/material";
+import { collection, doc, getDocs , updateDoc, arrayUnion } from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
 import { Post } from "../models/Post";
+import { onAuthStateChanged, User } from "firebase/auth";
 import Comment from "./Comment";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import "../styles/global.css";
 
+interface UserData {
+    id: string;
+    displayName: string;
+}
+
 const Search = () => {
     const [posts, setPosts] = useState<Post[]>([]);
-    const [user, setUser] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const [users, setUsers] = useState('');
+    const [users, setUsers] = useState<{ [key: string]: { displayName: string } }>({});
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
 
     const handleSearch = async(searchQuery: string) => {
         setSearchQuery(searchQuery);
@@ -41,9 +54,12 @@ const Search = () => {
     const fetchUsers = async() => {
         const usersCollection = collection(db, 'users');
         const usersSnapshot = await getDocs(usersCollection);
-        const usersList = usersSnapshot.docs. reduce((acc: {[key: string]: any}, doc) => {
+        const usersList = usersSnapshot.docs. reduce((acc: {[key: string]: UserData}, doc) => {
             const data = doc.data();
-            acc[doc.id] = {id: doc.id, ...data};
+            acc[doc.id] = {
+                id: doc.id,
+                displayName: data.displayName || 'Unknown',
+            };
             return acc;
         }, {});
         setUsers(usersList);
@@ -52,9 +68,9 @@ const Search = () => {
     return(
         <Container maxWidth="lg">
             <SearchBar onSearch={handleSearch}/>
-            <Grid2 container spacing={4} className="grid-container">
+            <Grid container spacing={4} className="grid-container">
                 {posts.map((post) => (
-                    <Grid2 item key={post.id} xs={12} sm={6} md={4} >
+                    <Grid item key={post.id} xs={12} sm={6} md={4} >
                         <Card>
                             <CardContent className="card-content">
                                 <Typography gutterBottom variant="h5" component="div">
@@ -72,9 +88,9 @@ const Search = () => {
                                 </div>
                             </CardContent>
                         </Card>
-                    </Grid2>
+                    </Grid>
                 ))}
-            </Grid2>
+            </Grid>
         </Container>
     );
 };

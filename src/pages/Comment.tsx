@@ -1,19 +1,27 @@
 // src/pages/Comment.tsx
 
 import React, {useState} from "react";
-import { TextField, Button, IconButton, List, ListItem, Dialog, DialogTitle, ListItemText, Grid2 } from "@mui/material";
+import { TextField, Button, IconButton, ListItem, Dialog, DialogTitle, ListItemText, Grid2 } from "@mui/material";
 import { db } from "../firebaseConfig";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where, Timestamp } from "firebase/firestore";
 import CommentIcon from '@mui/icons-material/Comment';
-import { data } from "react-router-dom";
 import "../styles/global.css";
+interface CommentProps {
+    postId: string;
+}
 
-const Comment = ({ postId }) => {
-    const [comment, setComment] = useState("");
-    const [comments, setComments] = useState([]);
-    const [open, setOpen] = useState(false);
+interface CommentData {
+    id: string;
+    text: string;
+    createdAt: Date;
+}
 
-    const handleCommentSubmit = async(e) => {
+const Comment = ({ postId }: CommentProps) => {
+    const [comment, setComment] = useState<string>("");
+    const [comments, setComments] = useState<CommentData[]>([]);
+    const [open, setOpen] = useState<boolean>(false);
+
+    const handleCommentSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             await addDoc(collection(db, "comments"),{
@@ -32,13 +40,13 @@ const Comment = ({ postId }) => {
         const q = query(collection(db, "comments"), where('postId', '==', postId));
         const querySnapshot = await getDocs(q);
         const fetchedComments = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {id: doc.id, ...data, createdAt: data.createdAt.toDate()};
+            const data = doc.data() as { text: string; createdAt: Timestamp };
+            return {id: doc.id, text: data.text, createdAt: data.createdAt.toDate() };
         });
         setComments(fetchedComments);
     }
 
-    const handleCommentChange = (e) => {
+    const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setComment(e.target.value);
     };
 
@@ -58,6 +66,7 @@ const Comment = ({ postId }) => {
             </IconButton>
             <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
                 <DialogTitle>コメントを追加</DialogTitle>
+                <form onSubmit={handleCommentSubmit}>
                 <TextField 
                     label="コメントを追加"
                     value={comment}
@@ -65,9 +74,10 @@ const Comment = ({ postId }) => {
                     onChange={handleCommentChange}
                     style={{ marginBottom: '10px', maxWidth: '800px', margin: 'auto' }}
                 />
-                <Button onClick={handleCommentSubmit} variant="contained" color="primary" sx={{ width: '100px', height: '40px', margin: 'auto', display: 'block', marginTop: '10px' }}>
+                <Button type="submit" variant="contained" color="primary" sx={{ width: '100px', height: '40px', margin: 'auto', display: 'block', marginTop: '10px' }}>
                     送信
                 </Button>
+                </form>
                 <DialogTitle>コメント一覧</DialogTitle>
                 <Grid2 container spacing={2} className="comment-grid">
                     {comments.map((comment) => (

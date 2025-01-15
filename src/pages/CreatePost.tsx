@@ -7,7 +7,7 @@ import "../styles/global.css";
 
 const CreatePost = () => {
 
-    const [caption, setCaption] = useState('');
+    const [caption, setCaption] = useState<string>('');
     const navigate = useNavigate();
 
     const handleUpload = async(e: React.FormEvent) => {
@@ -25,7 +25,7 @@ const CreatePost = () => {
             //Firebaseに登校を追加
             await addDoc(collection(db, 'posts'), {
                 caption,
-                userId: auth.currentUser.uid,
+                userId: auth.currentUser!.uid,
                 createdAt: new Date(),
             });
 
@@ -47,9 +47,8 @@ const CreatePost = () => {
                     fullWidth
                     value={caption}
                     margin="normal"
-                    onChange={(e) => setCaption(e.target.value)}
+                    onChange={(e) => setCaption(e.target.value.substring(0, 30))}
                     required
-                    slotProps={{ input: { maxLength: 30 } }}
                     />
                 <Button 
                     type="submit"

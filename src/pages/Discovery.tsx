@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { db, auth } from "../firebaseConfig";
-import { Container, Grid2, Card, CardContent, Typography, Button } from "@mui/material";
+import { Container, Card, CardContent, Typography, Button, Grid } from "@mui/material";
 import { Post } from "../models/Post";
-import { collection, getDocs, query, orderBy, limit, arrayUnion, doc, updateDoc, getDoc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, limit, arrayUnion, doc, updateDoc, getDoc, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import Comment from "./Comment";
 import "../styles/global.css";
 
+interface UserData {
+    id: string;
+    displayName: string;
+    email: string;
+}
+
 const Discovery = () => {
     const [posts, setPosts] = useState<Post[]>([]);
-    const [user, setUser] = useState(null);
-    const [users, setUsers] = useState({});
+    const [user, setUser] = useState<User | null>(null);
+    const [users, setUsers] = useState<{ [key: string]: UserData }>({});
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -65,9 +71,13 @@ const Discovery = () => {
     const fetchUsers = async() => {
         const usersCollection = collection(db, 'users');
         const usersSnapshot = await getDocs(usersCollection);
-        const usersList = usersSnapshot.docs.reduce((acc: {[key: string]: any}, doc) => {
-            const data = doc.data();
-            acc[doc.id] = {id: doc.id, ...data };
+        const usersList = usersSnapshot.docs.reduce((acc: {[key: string]: UserData }, doc: QueryDocumentSnapshot<DocumentData>) => {
+            const data = doc.data() as UserData;
+            acc[doc.id] = {
+                id: doc.id,
+                displayName: data.displayName || 'Unknown',
+                email: data.email || 'Unknown' 
+            };
             return acc;
         }, {});
         setUsers(usersList);
@@ -75,8 +85,8 @@ const Discovery = () => {
 
     return (
         <Container maxWidth="lg">
-            <Grid2 container spacing={2} style={{ marginBottom: '20px' }}>
-                <Grid2 item>
+            <Grid container spacing={2} style={{ marginBottom: '20px' }}>
+                <Grid item>
                     <Button 
                         onClick={fetchNewPosts} 
                         variant="outlined" 
@@ -92,12 +102,12 @@ const Discovery = () => {
                     >
                         新着投稿を確認
                     </Button>
-                </Grid2>
-                <Grid2 item>
+                </Grid>
+                <Grid item>
                     <Button 
                         onClick={fetchPopularPosts} 
                         variant="outlined" 
-                        color="gray"
+                        color= "inherit"
                         sx={{
                             borderColor: 'gray',
                             color: 'gray',
@@ -110,11 +120,11 @@ const Discovery = () => {
                     >
                         人気の投稿をチェック
                     </Button>
-                </Grid2>
-            </Grid2>
-            <Grid2 container spacing={4}>
+                </Grid>
+            </Grid>
+            <Grid container spacing={4}>
                 {posts.map((post) => (
-                    <Grid2 item key={post.id} xs={12} sm={6} md={4}>
+                    <Grid item key={post.id} xs={12} sm={6} md={4}>
                         <Card>
                             <CardContent className="card-content">
                                 <Typography gutterBottom variant="h5" component="div" className="caption-text">
@@ -134,9 +144,9 @@ const Discovery = () => {
                                 </div>
                             </CardContent>
                         </Card>
-                    </Grid2>
+                    </Grid>
                 ))}
-            </Grid2>
+            </Grid>
         </Container>
     );
 };

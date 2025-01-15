@@ -1,6 +1,6 @@
 // App.tsx
 
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -13,12 +13,12 @@ import Search from './pages/Search';
 import Signup from './pages/Signup';
 import LoginedUser from './pages/LoginedUser';
 import { auth } from './firebaseConfig';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 const drawerWidth = 50;
 
 const App = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

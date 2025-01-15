@@ -1,6 +1,6 @@
 // src/components/SearchBar.tsx
 
-import React, {useState} from "react";
+import {useState} from "react";
 import { TextField, Button } from "@mui/material";
 
 interface SearchBarProps {

@@ -1,6 +1,6 @@
 // src/pages/Signup.tsx
 
-import React, {useState, useEffect} from "react";
+import {useState} from "react";
 import { auth, db } from "../firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Container, TextField, Button, Typography } from "@mui/material";
@@ -28,7 +28,11 @@ const Signup = () => {
             alert("Account created successfully!");
             navigate('/');
         } catch (error) {
-            setError(error.message);
+            if (error instanceof Error) {
+                setError(error.message)
+            }else{
+                setError("An unknown error occurred");
+            }
         }
     };
 

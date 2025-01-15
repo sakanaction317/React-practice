@@ -1,14 +1,14 @@
 //src/pages/LoginedUser
 
-import React, {useState, useEffect } from "react";
+import {useState, useEffect } from "react";
 import { Typography, Box, Link } from "@mui/material";
 import { auth } from "../firebaseConfig";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const LoginedUser = () => {
-    const [currentUser, setCurrentUser] = useState(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
     const navigate = useNavigate();
 
     useEffect (() => {

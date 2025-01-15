@@ -3,7 +3,7 @@
 import React, {useState} from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
-import { Await, useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Container, TextField, Button, Typography, Box } from "@mui/material";
 
 const Login = () => {

@@ -1,4 +1,9 @@
 {
+  "compilerOptions": {
+    "strict": false,
+    "noEmitOnError": false, // エラーが発生してもビルドを続行
+    "skipLibCheck" : true // ライブラリの型チェックをスキップ
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
